@@ -49,21 +49,22 @@ def create_query():
         intents, keywords = parse_query_with_gpt(query)
         deployment_name = next((kw for kw in keywords if "deployment" in kw.lower()), None)
 
+        # Handle specific query cases
         if intents["pods"] and intents["namespace"]:
             pods = get_pods_in_namespace()
-            answer = f"{len(pods)} pods in the default namespace."
+            answer = f"{len(pods)} pods"
 
         elif "nodes" in query.lower() and "cluster" in query.lower():
             nodes = get_pods_with_nodes()
             node_names = set([pod["node"] for pod in nodes])
-            answer = f"There are {len(node_names)} nodes in the cluster."
+            answer = f"{len(node_names)} nodes in the cluster."
 
         elif intents["pods"] and "restarts" in query.lower():
             pod_name = next((kw for kw in keywords if "deployment" in kw.lower()), None)
             if pod_name:
                 pod_full_name, restarts = get_pod_restarts(pod_name)
                 if pod_full_name and restarts is not None:
-                    answer = f"[{pod_full_name} restarted {restarts} times]"
+                    answer = f"{pod_full_name} restarted {restarts} times"
                 elif pod_full_name is None:
                     answer = f"Multiple pods match '{pod_name}'. Please provide more specific details."
                 else:
@@ -90,7 +91,7 @@ def create_query():
         elif intents["pods"] and intents.get("status", False):
             pods = get_pods_in_namespace()
             pod_name = next((kw for kw in keywords if kw in [pod["name"] for pod in pods]), None)
-            answer = f"'Running" if pod_name else \
+            answer = f"Running" if pod_name else \
                 "Pod specified in the query was not found in the default namespace."
 
         else:
