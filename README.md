@@ -28,6 +28,7 @@ pip install -r requirements.txt
 ```
 ## Running the Application
 **Step 1: Start the Flask Server**
+
 **Run the application:**
 ```bash
 python main.py
