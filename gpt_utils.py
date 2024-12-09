@@ -56,8 +56,8 @@ def parse_query_with_gpt(query):
             keywords = extract_kubernetes_names(query)
             logging.warning("Keywords extracted using fallback regex method.")
 
-        logging.info(f"Parsed Intents: {intents}")
-        logging.info(f"Parsed Keywords: {keywords}")
+        # logging.info(f"Parsed Intents: {intents}")
+        # logging.info(f"Parsed Keywords: {keywords}")
 
         return intents, keywords
     except json.JSONDecodeError as e:
