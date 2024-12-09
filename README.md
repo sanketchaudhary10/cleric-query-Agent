@@ -46,7 +46,6 @@ cleric-query-agent
 ├─ kube_utils.py
 ├─ main.py
 ├─ models.py
-├─ nlp_utils.py
 ├─ README.md
 └─ requirements.txt
 
