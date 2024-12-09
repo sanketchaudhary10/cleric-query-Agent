@@ -26,7 +26,6 @@ except Exception as e:
 
 app = Flask(__name__)
 
-
 class QueryResponse(BaseModel):
     query: str
     answer: str
@@ -39,16 +38,20 @@ def index():
 def create_query():
     try:
         request_data = request.json
-        query = request_data.get('query')
+        if not request_data or "query" not in request_data:
+            logging.error("Invalid request payload: missing 'query'")
+            return jsonify({"error": "The 'query' field is required in the request payload."}), 400
 
+        query = request_data.get('query')
         logging.info(f"Received query: {query}")
 
+        # Parse query using GPT
         intents, keywords = parse_query_with_gpt(query)
         deployment_name = next((kw for kw in keywords if "deployment" in kw.lower()), None)
 
         if intents["pods"] and intents["namespace"]:
             pods = get_pods_in_namespace()
-            answer = f"There are {len(pods)} pods in the default namespace."
+            answer = f"{len(pods)} pods in the default namespace."
 
         elif "nodes" in query.lower() and "cluster" in query.lower():
             nodes = get_pods_with_nodes()
@@ -58,11 +61,13 @@ def create_query():
         elif intents["pods"] and "restarts" in query.lower():
             pod_name = next((kw for kw in keywords if "deployment" in kw.lower()), None)
             if pod_name:
-                restarts = get_pod_restarts(pod_name)
-                if restarts is not None:
-                    answer = f"{pod_name} restarted {restarts} times."
+                pod_full_name, restarts = get_pod_restarts(pod_name)
+                if pod_full_name and restarts is not None:
+                    answer = f"[{pod_full_name} restarted {restarts} times]"
+                elif pod_full_name is None:
+                    answer = f"Multiple pods match '{pod_name}'. Please provide more specific details."
                 else:
-                    answer = f"No restart information found for the pod '{pod_name}'. Please verify if the pod exists in the namespace."
+                    answer = f"No restart information found for the pod '{pod_name}'."
             else:
                 answer = "Pod name could not be identified. Please specify a valid pod name."
 
@@ -85,10 +90,8 @@ def create_query():
         elif intents["pods"] and intents.get("status", False):
             pods = get_pods_in_namespace()
             pod_name = next((kw for kw in keywords if kw in [pod["name"] for pod in pods]), None)
-            if pod_name:
-                answer = f"'{pod_name}' is 'Running'."
-            else:
-                answer = "Pod specified in the query was not found in the default namespace."
+            answer = f"'Running" if pod_name else \
+                "Pod specified in the query was not found in the default namespace."
 
         else:
             answer = "I'm sorry, I couldn't understand your query. Please try rephrasing."
@@ -103,8 +106,7 @@ def create_query():
         return jsonify({"error": e.errors()}), 400
     except Exception as e:
         logging.error(f"Error processing query: {e}", exc_info=True)
-        return jsonify({"error": "An error occurred while processing the query."}), 500
-
+        return jsonify({"error": "An error occurred while processing the query.", "details": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)

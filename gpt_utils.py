@@ -11,8 +11,10 @@ load_dotenv()
 # Set up OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def query_gpt(prompt):
+if not openai.api_key:
+    raise ValueError("OpenAI API key is missing. Set it in the environment variables.")
 
+def query_gpt(prompt):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -58,19 +60,18 @@ def parse_query_with_gpt(query):
         logging.info(f"Parsed Keywords: {keywords}")
 
         return intents, keywords
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to parse GPT response as JSON: {e}")
+        raise RuntimeError("GPT response was not in valid JSON format.")
     except Exception as e:
         logging.error(f"Error querying GPT-4: {e}")
         raise RuntimeError("Failed to parse query using GPT-4.")
 
-
 def extract_kubernetes_names(query):
     query_cleaned = re.sub(r"[^\w\s\-_]", "", query.lower())
-
-    
     deployment_pattern = re.compile(r"[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*")
     extracted_keywords = deployment_pattern.findall(query_cleaned)
 
-    
     stop_words = {"how", "many", "has", "the", "had", "is"}
     filtered_keywords = [kw for kw in extracted_keywords if kw not in stop_words]
 

@@ -3,7 +3,7 @@ import os
 import logging
 
 def initialize_k8s():
-    kubeconfig_path = os.path.join(os.environ["USERPROFILE"], ".kube", "config")
+    kubeconfig_path = os.getenv("KUBECONFIG", os.path.join(os.path.expanduser("~"), ".kube", "config"))
     if not os.path.exists(kubeconfig_path):
         raise FileNotFoundError(f"Kubeconfig file not found at {kubeconfig_path}")
     config.load_kube_config(config_file=kubeconfig_path)
@@ -32,25 +32,22 @@ def get_pods_with_nodes(namespace="default"):
         for pod in pod_list.items
     ]
 
-# def get_pod_restarts(pod_name, namespace="default"):
-#     logging.info(f"Fetching restart count for pod: {pod_name} in namespace: {namespace}")
-#     pods = get_pods_in_namespace(namespace)
-#     for pod in pods:
-#         if pod["name"] == pod_name:
-#             logging.info(f"'{pod_name}' restarts: {pod['restarts']}")
-#             return pod["restarts"]
-#     logging.warning(f"Pod '{pod_name}' not found in namespace '{namespace}'.")
-#     return None
-
 def get_pod_restarts(pod_name, namespace="default"):
     logging.info(f"Fetching restart count for pod: {pod_name} in namespace: {namespace}")
     pods = get_pods_in_namespace(namespace)
-    for pod in pods:
-        if pod_name in pod["name"]:  # Substring matching
-            logging.info(f"Found pod '{pod['name']}' for query pod '{pod_name}'. Restarts: {pod['restarts']}")
-            return pod["restarts"]
-    logging.warning(f"Pod '{pod_name}' not found in namespace '{namespace}'.")
-    return None
+    matched_pods = [pod for pod in pods if pod_name in pod["name"]]  
+
+    if len(matched_pods) == 1:
+        pod = matched_pods[0]
+        trimmed_name = trim_identifier(pod["name"])  
+        logging.info(f"Found pod '{pod['name']}' (trimmed to '{trimmed_name}'). Restarts: {pod['restarts']}")
+        return trimmed_name, pod["restarts"]
+    elif len(matched_pods) > 1:
+        logging.warning(f"Multiple pods matched the name '{pod_name}': {[pod['name'] for pod in matched_pods]}")
+        return None, None  
+    else:
+        logging.warning(f"No pods found matching the name '{pod_name}' in namespace '{namespace}'.")
+        return None, None
 
 def get_pods_by_deployment(deployment_name, namespace="default"):
     v1 = client.CoreV1Api()
@@ -72,9 +69,8 @@ def get_pods_by_deployment(deployment_name, namespace="default"):
     except client.exceptions.ApiException as e:
         if e.status == 404:
             logging.warning(f"Deployment '{deployment_name}' not found in namespace '{namespace}'.")
-            return []  
+            return []
         raise RuntimeError(f"Error fetching pods for deployment '{deployment_name}': {e}")
 
 def trim_identifier(name):
     return "-".join(name.split("-")[:-2]) if "-" in name else name
-
