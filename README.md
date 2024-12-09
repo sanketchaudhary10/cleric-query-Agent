@@ -52,7 +52,7 @@ cleric-query-agent
 
 ```
 
-**Approach**
+## Approach
 To solve this project, I aimed to create a reliable and user-friendly query agent capable of interpreting natural language queries and retrieving relevant Kubernetes cluster information. The process involved integrating OpenAI's GPT model for query parsing and Kubernetes APIs for fetching cluster data. Here's how I approached the problem:
 
 ## Understanding the Requirements: 
