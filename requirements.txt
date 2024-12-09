@@ -1,0 +1,18 @@
+<<<<<<< HEAD
+fastapi
+uvicorn
+kubernetes
+pydantic
+spacy
+python-dotenv
+openai==0.28
+flask
+=======
+fastapi
+uvicorn
+kubernetes
+pydantic
+spacy
+python-dotenv
+openai==0.28
+>>>>>>> c33188015ddd15f7c364ffa34c902c7ec91cd909

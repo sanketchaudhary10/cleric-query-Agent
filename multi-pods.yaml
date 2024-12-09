@@ -1,0 +1,53 @@
+<<<<<<< HEAD
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apple
+  labels:
+    app: app1
+spec:
+  containers:
+  - name: container1
+    image: nginx:1.21.6
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: orange
+  labels:
+    app: app2
+spec:
+  containers:
+  - name: container2
+    image: httpd:2.4
+    ports:
+    - containerPort: 80
+=======
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apple
+  labels:
+    app: app1
+spec:
+  containers:
+  - name: container1
+    image: nginx:1.21.6
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: orange
+  labels:
+    app: app2
+spec:
+  containers:
+  - name: container2
+    image: httpd:2.4
+    ports:
+    - containerPort: 80
+>>>>>>> c33188015ddd15f7c364ffa34c902c7ec91cd909
