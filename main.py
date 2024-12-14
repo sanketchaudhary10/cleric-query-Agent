@@ -32,7 +32,7 @@ class QueryResponse(BaseModel):
 
 @app.route('/')
 def index():
-    return jsonify({"message": "Welcome to the Query API! Use the POST /query endpoint."})
+    return jsonify({"message": "Use the POST /query endpoint."})
 
 @app.route('/query', methods=['POST'])
 def create_query():
