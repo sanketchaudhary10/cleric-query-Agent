@@ -6,10 +6,20 @@ def initialize_k8s():
     kubeconfig_path = os.getenv("KUBECONFIG", os.path.join(os.path.expanduser("~"), ".kube", "config"))
     if not os.path.exists(kubeconfig_path):
         raise FileNotFoundError(f"Kubeconfig file not found at {kubeconfig_path}")
+    logging.info(f"KUBECONFIG resolved path: {kubeconfig_path}")
     config.load_kube_config(config_file=kubeconfig_path)
-    logging.info(f"KUBECONFIG in use: {os.getenv('KUBECONFIG')} (Resolved Path: {kubeconfig_path})")
+    context_info = config.list_kube_config_contexts()
+    logging.info(f"Active Kubernetes context: {context_info[1] if context_info else 'None'}")
 
-def get_pods_in_namespace(namespace="default"):
+def get_kubernetes_api_server():
+    api_client = client.ApiClient()
+    return api_client.configuration.host
+
+logging.info(f"Kubernetes API server: {get_kubernetes_api_server()}")
+
+def get_pods_in_namespace(namespace="validator-namespace"):
+    if namespace != "validator-namespace":
+        raise RuntimeError(f"Access to namespace '{namespace}' is not allowed.")
     v1 = client.CoreV1Api()
     pod_list = v1.list_namespaced_pod(namespace)
     return [
