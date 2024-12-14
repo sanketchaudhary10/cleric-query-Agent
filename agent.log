@@ -890,3 +890,4 @@
 
 2024-12-14 10:59:59,022 INFO - Generated answer: 4 pods
 2024-12-14 10:59:59,023 INFO - 127.0.0.1 - - [14/Dec/2024 10:59:59] "POST /query HTTP/1.1" 200 -
+2024-12-14 15:00:04,971 ERROR - Failed to initialize Kubernetes configuration: Kubeconfig file not found at C:\Users\Sanket Chaudhary\.kube\config

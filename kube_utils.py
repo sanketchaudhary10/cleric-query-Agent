@@ -7,6 +7,7 @@ def initialize_k8s():
     if not os.path.exists(kubeconfig_path):
         raise FileNotFoundError(f"Kubeconfig file not found at {kubeconfig_path}")
     config.load_kube_config(config_file=kubeconfig_path)
+    logging.info(f"KUBECONFIG in use: {os.getenv('KUBECONFIG')} (Resolved Path: {kubeconfig_path})")
 
 def get_pods_in_namespace(namespace="default"):
     v1 = client.CoreV1Api()
@@ -23,14 +24,17 @@ def get_pods_in_namespace(namespace="default"):
 def get_pods_with_nodes(namespace="default"):
     v1 = client.CoreV1Api()
     pod_list = v1.list_namespaced_pod(namespace)
-    return [
-        {
-            "name": pod.metadata.name,
-            "node": pod.spec.node_name,
-            "status": pod.status.phase,
-        }
-        for pod in pod_list.items
-    ]
+    pods_with_nodes = []
+    for pod in pod_list.items:
+        if pod.spec.node_name:
+            pods_with_nodes.append({
+                "name": pod.metadata.name,
+                "node": pod.spec.node_name,
+                "status": pod.status.phase,
+            })
+        else:
+            logging.warning(f"Pod {pod.metadata.name} does not have a nodeName assigned.")
+    return pods_with_nodes
 
 def get_pod_restarts(pod_name, namespace="default"):
     logging.info(f"Fetching restart count for pod: {pod_name} in namespace: {namespace}")
@@ -57,7 +61,7 @@ def get_pods_by_deployment(deployment_name, namespace="default"):
         deployment = apps_v1.read_namespaced_deployment(deployment_name, namespace)
         selector = deployment.spec.selector.match_labels
         label_selector = ",".join([f"{key}={value}" for key, value in selector.items()])
-        logging.info(f"Label selector for deployment '{deployment_name}': {label_selector}")
+        logging.info(f"Namespace: {namespace}, Label selector for deployment '{deployment_name}': {label_selector}")
 
         pod_list = v1.list_namespaced_pod(namespace, label_selector=label_selector)
         pods = [

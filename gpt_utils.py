@@ -14,17 +14,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 if not openai.api_key:
     raise ValueError("OpenAI API key is missing. Set it in the environment variables.")
 
-def query_gpt(prompt):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response['choices'][0]['message']['content']
-    except openai.error.OpenAIError as e:
-        logging.error(f"OpenAI API Error: {e}")
-        raise RuntimeError(f"Error querying GPT-4: {e}")
-
 def parse_query_with_gpt(query):
     prompt = f"""
     Parse the following query into intents and keywords. 
@@ -56,9 +45,6 @@ def parse_query_with_gpt(query):
             keywords = extract_kubernetes_names(query)
             logging.warning("Keywords extracted using fallback regex method.")
 
-        # logging.info(f"Parsed Intents: {intents}")
-        # logging.info(f"Parsed Keywords: {keywords}")
-
         return intents, keywords
     except json.JSONDecodeError as e:
         logging.error(f"Failed to parse GPT response as JSON: {e}")
@@ -67,6 +53,18 @@ def parse_query_with_gpt(query):
         logging.error(f"Error querying GPT-4: {e}")
         raise RuntimeError("Failed to parse query using GPT-4.")
 
+def query_gpt(prompt):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response['choices'][0]['message']['content']
+    except openai.error.OpenAIError as e:
+        logging.error(f"OpenAI API Error: {e}")
+        raise RuntimeError(f"Error querying GPT-4: {e}")
+
+# Add extraction fallback
 def extract_kubernetes_names(query):
     query_cleaned = re.sub(r"[^\w\s\-_]", "", query.lower())
     deployment_pattern = re.compile(r"[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*")
