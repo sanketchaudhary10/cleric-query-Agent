@@ -3,13 +3,15 @@ import os
 import logging
 
 def initialize_k8s():
-    kubeconfig_path = os.getenv("KUBECONFIG", os.path.join(os.path.expanduser("~"), ".kube", "config"))
+    if "KUBECONFIG" in os.environ:
+        # logging.warning(f"Clearing pre-existing KUBECONFIG: {os.getenv('KUBECONFIG')}")
+        del os.environ["KUBECONFIG"]
+    
+    kubeconfig_path = os.path.join(os.path.expanduser("~"), ".kube", "config")
     if not os.path.exists(kubeconfig_path):
         raise FileNotFoundError(f"Kubeconfig file not found at {kubeconfig_path}")
-    logging.info(f"KUBECONFIG resolved path: {kubeconfig_path}")
     config.load_kube_config(config_file=kubeconfig_path)
-    context_info = config.list_kube_config_contexts()
-    logging.info(f"Active Kubernetes context: {context_info[1] if context_info else 'None'}")
+    logging.info(f"Kubernetes configuration initialized successfully. Resolved KUBECONFIG path: {kubeconfig_path}")
 
 def get_kubernetes_api_server():
     api_client = client.ApiClient()
