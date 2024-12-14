@@ -53,7 +53,7 @@ cleric-query-agent
 ```
 
 ## Approach
-To solve this project, I aimed to create a reliable and user-friendly query agent capable of interpreting natural language queries and retrieving relevant Kubernetes cluster information. The process involved integrating OpenAI's GPT model for query parsing and Kubernetes APIs for fetching cluster data. Here's how I approached the problem:
+To solve this project, I aimed to create a query agent capable of interpreting natural language queries and retrieving relevant Kubernetes cluster information. The process involved integrating OpenAI's GPT model for query parsing and Kubernetes for fetching cluster data. My Approach:
 
 ## Understanding the Requirements: 
 
@@ -72,4 +72,5 @@ I broke down the requirements into three main components:
 ## Challenge: Mapping Natural Language Queries to Kubernetes Operations
 
 Parsing natural language queries and mapping them to Kubernetes operations was challenging due to varying query structures and intents.
-Solution: I initially used the spaCy model for quick prototyping and checking the query parsing ability of the model. Later, I switched to the required GPT-4 model. During this process I also tried a couple of GPT variants such as 4o-mini and 4o. Finally I decided to use the GPT-4 model for the query parser to identify key intents (e.g., "pods," "restarts," "status") and keywords (e.g., deployment names). This modular approach improved accuracy and simplified query mapping. Another challenging aspect of this project was handling the multiple cases associated with the kubernetes clusters. This included checking for key issues such as deployment-names, deployment-restarts, deployment-counts etc. To resolve this I created a simple modular code structure using exception handling to answer any edge cases.
+
+**Solution:** I initially used the spaCy model for quick prototyping and checking the query parsing ability of the model. Later, I switched to the required GPT-4 model. During this process I also tried a couple of GPT variants such as 4o-mini and 4o. Finally I decided to use the GPT-4 model for the query parser to identify key intents (e.g., "pods," "restarts," "status") and keywords (e.g., deployment names). This modular approach improved accuracy and simplified query mapping. Another challenging aspect of this project was handling the multiple cases associated with the kubernetes clusters. This included checking for key issues such as deployment-names, deployment-restarts, deployment-counts etc. To resolve this I created a simple modular code structure using exception handling to answer any edge cases.
